@@ -5,6 +5,7 @@ from fastapi import APIRouter
 from app.controllers.user import user_controller
 from app.core.ctx import CTX_USER_ID
 from app.core.dependency import DependAuth
+from app.core.bgtask import BgTasks
 from app.models.admin import Api, Menu, Role, User
 from app.schemas.base import Fail, Success
 from app.schemas.login import *
@@ -101,3 +102,33 @@ async def update_user_password(req_in: UpdatePassword):
     user.password = get_password_hash(req_in.new_password)
     await user.save()
     return Success(msg="修改成功")
+
+
+@router.post("/bg_task_demo", summary="后台任务用例：注册一个任务并在响应后执行")
+async def bg_task_demo(msg: str = "hello", n: int = 1):
+    """
+    用于验证 BackGroundTaskMiddleware 是否生效：
+    - 接口会立刻返回 Success
+    - 但会注册一个后台任务：向 log/bg_tasks_demo.log 追加写入一行
+
+    说明：这里不做鉴权，跟 /access_token 同属于 base 模块。
+    """
+
+    def _write_demo_log(message: str, times: int):
+        # 注意：starlette BackgroundTasks 会在当前进程内执行该函数
+        # 这里保持逻辑简单，用文件落地作为可观测的结果。
+        import os
+        import time
+
+        log_dir = os.path.join(os.getcwd(), "log")
+        os.makedirs(log_dir, exist_ok=True)
+        fp = os.path.join(log_dir, "bg_tasks_demo.log")
+
+        with open(fp, "a", encoding="utf-8") as f:
+            for i in range(max(1, times)):
+                f.write(f"{datetime.now(timezone.utc).isoformat()} | {message} | i={i}\n")
+                f.flush()
+                time.sleep(1)
+
+    await BgTasks.add_task(_write_demo_log, msg, n)
+    return Success(data={"queued": True, "msg": msg, "n": n})
