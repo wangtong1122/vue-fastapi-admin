@@ -87,3 +87,10 @@ class AuditLog(BaseModel, TimestampMixin):
     response_time = fields.IntField(default=0, description="响应时间(单位ms)", index=True)
     request_args = fields.JSONField(null=True, description="请求参数")
     response_body = fields.JSONField(null=True, description="返回数据")
+
+
+class Order(BaseModel, TimestampMixin):
+    order_number = fields.CharField(max_length=50, unique=True, description="订单编号", index=True)
+    user_id = fields.IntField(description="用户ID", index=True)
+    amount = fields.FloatField(description="订单金额")
+    status = fields.CharField(max_length=20, description="订单状态", index=True)
