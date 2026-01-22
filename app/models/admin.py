@@ -1,4 +1,4 @@
-from tortoise import fields
+from tortoise import fields, models
 
 from app.schemas.menus import MenuType
 
@@ -94,3 +94,22 @@ class Order(BaseModel, TimestampMixin):
     user_id = fields.IntField(description="用户ID", index=True)
     amount = fields.FloatField(description="订单金额")
     status = fields.CharField(max_length=20, description="订单状态", index=True)
+
+
+
+class Class(BaseModel, TimestampMixin):
+    id = fields.IntField(pk=True, description="班级唯一标识")
+    name = fields.CharField(max_length=10, description="班级名称")
+    # 类型提示，仅用于Code 联想字段 匹配 下方关联的related_name
+    students: fields.ReverseRelation["Student"]
+
+
+class Student(BaseModel, TimestampMixin):
+    """学生"""
+    id = fields.IntField(pk=True, description="学生唯一标识")
+    name = fields.CharField(max_length=20, description="学生名称")
+    age = fields.IntField(description="学生年龄")
+    # Class Object 通过 students 拿到 List[Student Object] , 类型标注友好提示 code联想补充
+    # 生成外建； 字段名 + _to_field（默认主表的主键）
+    my_class: fields.ForeignKeyRelation[Class] = fields.ForeignKeyField("models.Class", related_name='students',
+                                                                        description="所属班级")

@@ -17,7 +17,7 @@ class Loggin:
         loguru_logger.remove()
         loguru_logger.add(sink=sys.stdout, level=self.level)
 
-        # logger.add("my_project.log", level=level, rotation="100 MB")  # Output log messages to a file
+        loguru_logger.add("my_project.log",  rotation="100 MB")  # Output log messages to a file
         return loguru_logger
 
 
