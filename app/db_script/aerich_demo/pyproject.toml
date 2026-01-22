@@ -1,0 +1,12 @@
+[tool.aerich]
+# Use an absolute import path so Aerich can import it no matter the current working directory.
+tortoise_orm = "app.db_script.aerich_demo.orm_config.TORTOISE_ORM"
+
+# Keep demo migrations isolated under this folder.
+# IMPORTANT: when running from the repo root, `location` is resolved relative to CWD.
+# Use an explicit path so it always lands under the demo folder.
+location = "./app/db_script/aerich_demo/migrations"
+
+# Add the **project root** to sys.path for imports like `app.*`.
+# When running from the repo root, this should be `.`.
+src_folder = "."
